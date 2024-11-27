@@ -35,7 +35,7 @@ exports.register = async (req, res) => {
         // const token = await generateToken({ email: user.email , id: user._id , role: user.role });
         // user.token = token;
         await user.save();
-        res.status(httpStatus.CREATED).json({ status: httpStatus.SUCCESS, data: user.token });
+        res.status(httpStatus.CREATED).json({ status: httpStatus.SUCCESS, data: user });
     }
     catch (error) {
         res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
