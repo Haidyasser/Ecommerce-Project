@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
-    fistName:{
+    firstName:{
         type: String,
         required: true,
         trim: true,
@@ -29,8 +29,8 @@ const userSchema = new mongoose.Schema({
     },
     role:{
         type: String,
-        emun: ['admin', 'user'],
-        default: 'user'
+        enum: ['admin', 'user'],
+        default: 'user',
     },
     token:{
         type: String

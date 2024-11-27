@@ -13,5 +13,5 @@ exports.userValidation = () => [
     body('lastName').isLength({min: 3}).withMessage('Last name should be at least 3 characters long'),
     body('email').isEmail().withMessage('Invalid email'),
     body('password').isLength({min: 6}).withMessage('Password should be at least 6 characters long'),
-    body('role').isIn(['admin', 'user']).withMessage('Role should be either admin or user')
+    body('role').optional().isIn(['admin', 'user']).withMessage('Role should be either admin or user')
 ]
