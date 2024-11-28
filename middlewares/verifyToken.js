@@ -11,9 +11,11 @@ exports.verifyToken = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        if (User.findOne({ _id: decoded.id }) === null) {
+        const user = await User.findById(decoded.id);
+        if (!user) {
             return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
         }
+        console.log(decoded);
         req.user = decoded;
         next();
     }
