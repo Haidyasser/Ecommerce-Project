@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const httpStatus = require('../utils/httpStatus');
+const User = require('../models/userModel');
 
 exports.verifyToken = async (req, res, next) => {
     try {
@@ -10,6 +11,9 @@ exports.verifyToken = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        if (User.findOne({ _id: decoded.id }) === null) {
+            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+        }
         req.user = decoded;
         next();
     }
