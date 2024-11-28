@@ -2,6 +2,7 @@ const express = require('express');
 const productRoute = require('./routes/productRoute');
 const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
+const cartRoute = require('./routes/cartRoute');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
@@ -32,6 +33,7 @@ app.use(express.json());
 app.use('/products', productRoute);
 app.use('/auth', authRoute);
 app.use('/users', userRoute);
+app.use('/carts', cartRoute);
 app.all('*', (req, res) => {
     res.status(httpStatus.NOT_FOUND)
     .json({status: httpStatus.FAIL, message: 'Resource not found'});
