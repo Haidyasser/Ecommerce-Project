@@ -34,6 +34,7 @@ app.use('/products', productRoute);
 app.use('/auth', authRoute);
 app.use('/users', userRoute);
 app.use('/carts', cartRoute);
+app.use('/orders', orderRoute);
 app.all('*', (req, res) => {
     res.status(httpStatus.NOT_FOUND)
     .json({status: httpStatus.FAIL, message: 'Resource not found'});
