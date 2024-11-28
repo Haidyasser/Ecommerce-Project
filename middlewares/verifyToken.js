@@ -15,7 +15,6 @@ exports.verifyToken = async (req, res, next) => {
         if (!user) {
             return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
         }
-        console.log(decoded);
         req.user = decoded;
         next();
     }
