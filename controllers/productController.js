@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 const Product = require('../models/productModel');
-const httpStatus = require('../utilities/httpStatus');
+const httpStatus = require('../utils/httpStatus');
 
 const buildProductQuery = ({ search, category, minPrice, maxPrice }) => {
     const query = {};
