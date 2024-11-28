@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const httpStatus = require('../utilities/httpStatus');
+const httpStatus = require('../utils/httpStatus');
 
 exports.verifyToken = async (req, res, next) => {
     try {
@@ -17,3 +17,25 @@ exports.verifyToken = async (req, res, next) => {
         res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.ERROR, message: error.message });
     }
 };
+
+exports.verifyTokenAdmin = async (req, res, next) => {
+    this.verifyToken(req, res, () => {
+        if (req.user.role === 'admin') {
+            next();
+        }
+        else {
+            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+        }
+    })
+}
+
+exports.verifyTokenAndAuthorized = async (req, res, next) => {
+    this.verifyToken(req, res, () => {
+        if (req.user.role === 'admin' || req.user.id === req.params.id) {
+            next();
+        }
+        else {
+            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+        }
+    })
+}
