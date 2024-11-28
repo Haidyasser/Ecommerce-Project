@@ -49,6 +49,7 @@ exports.updateCart = async (req, res) => {
     try {
         const products = [req.body.products];
         for (let i = 0; i < products.length; i++) {
+            if (!products[i]) break;
             const product = await Product.findById(products[i].productId);
             if (!product) {
                 return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
