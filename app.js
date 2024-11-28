@@ -1,10 +1,11 @@
 const express = require('express');
 const productRoute = require('./routes/productRoute');
 const userRoute = require('./routes/userRoute');
+const authRoute = require('./routes/authRoute');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
-const httpStatus = require('./utilities/httpStatus');
+const httpStatus = require('./utils/httpStatus');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(express.json());
 
 // Use the routes
 app.use('/products', productRoute);
+app.use('/auth', authRoute);
 app.use('/users', userRoute);
 app.all('*', (req, res) => {
     res.status(httpStatus.NOT_FOUND)
