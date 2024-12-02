@@ -2,7 +2,6 @@ const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
 const Order = require('../models/orderModel');
 const {BAD_REQUEST, CREATED, OK, NOT_FOUND, ERROR, SUCCESS, FAIL} = require('../utils/httpStatus');
-const { parse } = require('dotenv');
 
 exports.getCart = async (req, res) => {
     try {

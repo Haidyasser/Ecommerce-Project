@@ -10,13 +10,13 @@ router.route('/')
 router.route('/:id')
     .delete(verifyTokenAndAuthorized, deleteCart);
 
-router.route('/find/:userId')
+router.route('/find')
     .get(verifyTokenAndAuthorized, getCart);
 
-router.route('/push/:userId')
+router.route('/push')
     .put(verifyTokenAndAuthorized, pushToCart);
 
-router.route('/remove/:userId')
+router.route('/remove')
     .put(verifyTokenAndAuthorized, removeFromCart);
 
 router.route('/placeOrder')
