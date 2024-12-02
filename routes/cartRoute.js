@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {verifyTokenAdmin, verifyTokenAndAuthorized} = require('../middlewares/verifyToken');
-const {createCart, getCart, pushToCart, removeFromCart, deleteCart, getCarts} = require('../controllers/cartController');
+const {createCart, getCart, pushToCart, removeFromCart, deleteCart, getCarts, placeOrder} = require('../controllers/cartController');
 
 router.route('/')
     .get(verifyTokenAdmin, getCarts)
@@ -18,5 +18,8 @@ router.route('/push/:userId')
 
 router.route('/remove/:userId')
     .put(verifyTokenAndAuthorized, removeFromCart);
+
+router.route('/placeOrder')
+    .post(verifyTokenAndAuthorized, placeOrder);
 
 module.exports = router;

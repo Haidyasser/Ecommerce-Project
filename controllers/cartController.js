@@ -1,6 +1,8 @@
 const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
+const Order = require('../models/orderModel');
 const {BAD_REQUEST, CREATED, OK, NOT_FOUND, ERROR, SUCCESS, FAIL} = require('../utils/httpStatus');
+const { parse } = require('dotenv');
 
 exports.getCart = async (req, res) => {
     try {
@@ -198,7 +200,6 @@ exports.removeFromCart = async (req, res) => {
     }
 };
 
-
 exports.deleteCart = async (req, res) => {
     try {
         const deleteCart = await Cart.findByIdAndDelete(req.params.id);
@@ -206,6 +207,40 @@ exports.deleteCart = async (req, res) => {
             return res.status(NOT_FOUND).json({ status: FAIL, message: "Cart not found" });
         }
         res.status(OK).json({ status: SUCCESS, message: "Cart deleted successfully" });
+    }
+    catch (error) {
+        res.status(BAD_REQUEST).json({ status: ERROR, message: error.message });
+    }
+}
+
+exports.placeOrder = async (req, res) => {
+    try {
+        // get items from cart
+        const cart = await Cart.findOne({ userId: req.user.id });
+        if (!cart) {
+            return res.status(NOT_FOUND).json({ status: FAIL, message: "Cart not found" });
+        }
+        let total = 0;
+        for (let i = 0; i < cart.products.length; i++) {
+            const product = await Product.findById(cart.products[i].productId);
+            total += product.price * cart.products[i].quantity;
+        }
+
+        // create order
+        const order = new Order({
+            userId: req.user.id,
+            products: cart.products,
+            total: total,
+            address: req.body.address,
+            paymentType: req.body.paymentType
+        });
+        await order.save();
+
+        // clear cart
+        cart.products = [];
+        await cart.save();
+
+        res.status(CREATED).json({ status: SUCCESS, data: order });
     }
     catch (error) {
         res.status(BAD_REQUEST).json({ status: ERROR, message: error.message });
