@@ -4,18 +4,21 @@ const cartSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    products: [
-        {
-            productId: {
-                type: String,
-                required: true
-            },
-            quantity: {
-                type: Number,
-                required: true
+    products: {
+        type: [
+            {
+                productId: {
+                    type: String,
+                    required: true
+                },
+                quantity: {
+                    type: Number,
+                    required: true
+                }
             }
-        }
-    ]
+        ],
+        required: true
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Cart', cartSchema);
