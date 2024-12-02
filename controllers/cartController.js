@@ -1,80 +1,213 @@
 const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
-const httpStatus = require('../utils/httpStatus');
+const {BAD_REQUEST, CREATED, OK, NOT_FOUND, ERROR, SUCCESS, FAIL} = require('../utils/httpStatus');
 
 exports.getCart = async (req, res) => {
     try {
         const cart = await Cart.findOne({ userId: req.user.id }, { "__v": false });
         if (!cart) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Cart not found" });
+            return res.status(NOT_FOUND).json({ status: FAIL, message: "Cart not found" });
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: cart });
+        res.status( OK).json({ status: SUCCESS, data: cart });
     }
     catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(BAD_REQUEST).json({ status: ERROR, message: error.message });
     }
 }
 
 exports.getCarts = async (req, res) => {
     try {
-        const carts = await Cart.find({}, { "__v": false });
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: carts });
+        const { page = 1, limit = 10 } = req.query;
+        const carts = await Cart.find({}, { "__v": false })
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
+        const total = await Cart.countDocuments();
+        res.status(OK).json({ 
+            status: SUCCESS, 
+            data: carts, 
+            meta: { total, page, limit } 
+        });
+
     }
     catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(BAD_REQUEST).json({ status: ERROR, message: error.message });
     }
 }
 
 exports.createCart = async (req, res) => {
     try {
-        const products = [req.body.products];
-        for (let i = 0; i < products.length; i++) {
-            if (!products[i]) break;
-            const product = await Product.findById(products[i].productId);
-            if (!product) {
-                return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
-            }
-        }
-        req.body.userId = req.user.id;
-        const cart = new Cart(req.body);
-        await cart.save();
-        res.status(httpStatus.CREATED).json({ status: httpStatus.SUCCESS, data: cart });
-    }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+        const products = req.body.products;
 
-exports.updateCart = async (req, res) => {
+        // Validate products array
+        if (!products || !Array.isArray(products) || products.length === 0) {
+            return res.status(BAD_REQUEST).json({
+                 status: FAIL, message: "Products array is required" 
+            });
+        }
+
+        // Validate product IDs
+        const productIds = products.map(p => p.productId);
+        const uniqueProductIds = [...new Set(productIds)]; // Ensure no duplicate IDs in the request
+        const existingProducts = await Product.find({ _id: { $in: uniqueProductIds } });
+
+        if (existingProducts.length !== uniqueProductIds.length) {
+            return res.status(BAD_REQUEST).json({ 
+                status: "fail", 
+                message: "One or more products are invalid" 
+            });
+        }
+
+        // Check for existing cart
+        const cartExist = await Cart.findOne({ userId: req.user.id });
+        if (cartExist) {
+            return res.status(BAD_REQUEST).json({ 
+                status: "fail", 
+                message: "Cart already exists" 
+            });
+        }
+
+        // Create the cart
+        const cart = new Cart({
+            ...req.body,
+            userId: req.user.id
+        });
+        await cart.save();
+
+        res.status(CREATED).json({ 
+            status: "success", 
+            data: cart 
+        });
+    } catch (error) {
+        res.status(BAD_REQUEST).json({ 
+            status: "error", 
+            message: error.message 
+        });
+    }
+};
+
+exports.pushToCart = async (req, res) => {
     try {
-        const products = [req.body.products];
-        for (let i = 0; i < products.length; i++) {
-            if (!products[i]) break;
-            const product = await Product.findById(products[i].productId);
-            if (!product) {
-                return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
+        const { products } = req.body;
+        if (!products || !Array.isArray(products) || products.length === 0) {
+            return res.status(BAD_REQUEST).json({
+                status: FAIL, message: "Products array is required"
+            });
+        }
+        // Validate product IDs in bulk
+        const productIds = products.map(p => p.productId);
+        const uniqueProductIds = [...new Set(productIds)];
+        const existingProducts = await Product.find({ _id: { $in: uniqueProductIds } });
+
+        if (existingProducts.length !== uniqueProductIds.length) {
+            return res.status(BAD_REQUEST).json({ 
+                status: "fail", 
+                message: "One or more products are invalid" 
+            });
+        }
+
+        // Find the cart
+        const cart = await Cart.findOne({ userId: req.user.id });
+        if (!cart) {
+            return res.status(NOT_FOUND).json({ 
+                status: "fail", 
+                message: "Cart not found" 
+            });
+        }
+
+        // Merge products (avoid duplicates)
+        const existingCartProducts = cart.products;
+        products.forEach(newProduct => {
+            const existingProduct = existingCartProducts.find(
+                p => p.productId.toString() === newProduct.productId
+            );
+
+            if (existingProduct) {
+                // Update quantity if product exists
+                existingProduct.quantity += newProduct.quantity;
+            } else {
+                // Add new product
+                existingCartProducts.push(newProduct);
             }
-        }
-        const updateCart = await Cart.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updateCart) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Cart not found" });
-        }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: updateCart });
+        });
+
+        // Save updated cart
+        cart.products = existingCartProducts;
+        await cart.save();
+
+        res.status(OK).json({ 
+            status: "success", 
+            data: cart 
+        });
+    } catch (error) {
+        res.status(BAD_REQUEST).json({ 
+            status: "error", 
+            message: error.message 
+        });
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
+};
+
+
+exports.removeFromCart = async (req, res) => {
+    try {
+        // Find the cart
+        const cart = await Cart.findOne({ userId: req.user.id });
+        if (!cart) {
+            return res.status(NOT_FOUND).json({
+                status: "fail",
+                message: "Cart not found"
+            });
+        }
+
+        // Validate the product ID
+        if (!req.body.productId) {
+            return res.status(BAD_REQUEST).json({
+                status: "fail",
+                message: "Product ID is required"
+            });
+        }
+
+        // Check if the product exists in the cart
+        const existingProduct = cart.products.find(
+            p => p.productId.toString() === req.body.productId
+        );
+
+        if (!existingProduct) {
+            return res.status(BAD_REQUEST).json({
+                status: "fail",
+                message: "Product not found in the cart"
+            });
+        }
+
+        // Remove the product from the cart
+        const updatedProducts = cart.products.filter(
+            p => p.productId.toString() !== req.body.productId
+        );
+
+        cart.products = updatedProducts;
+        await cart.save();
+
+        res.status(OK).json({
+            status: "success",
+            data: cart
+        });
+    } catch (error) {
+        res.status(BAD_REQUEST).json({
+            status: "error",
+            message: error.message
+        });
     }
-}
+};
+
 
 exports.deleteCart = async (req, res) => {
     try {
         const deleteCart = await Cart.findByIdAndDelete(req.params.id);
         if (!deleteCart) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Cart not found" });
+            return res.status(NOT_FOUND).json({ status: FAIL, message: "Cart not found" });
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, message: "Cart deleted successfully" });
+        res.status(OK).json({ status: SUCCESS, message: "Cart deleted successfully" });
     }
     catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
+        res.status(BAD_REQUEST).json({ status: ERROR, message: error.message });
     }
 }
