@@ -12,7 +12,7 @@ Contains modules and controllers related to user authentication and authorizatio
 - **Responsibilities**:
   - User registration and login.
   - Password hashing and verification.
-  - Email verification and password reset.
+  - Email verification and password reset. (in progress)
   - Token-based authentication (JWT).
 
 ---
@@ -114,7 +114,6 @@ Facilitates cart management for users.
 |-------------------|--------|-------------------------------|
 | `/users`          | GET    | Fetch all users (admin only). |
 | `/users/:id`      | GET    | Fetch a specific user.        |
-| `/users/profile`  | GET    | Fetch logged-in user's profile. |
 | `/users/:id`      | PUT    | Update user information.      |
 | `/users/:id`      | DELETE | Delete a user.                |
 
@@ -151,7 +150,7 @@ Facilitates cart management for users.
 | `/products`       | GET    | Fetch all products (paginated). |
 | `/products/:id`   | GET    | Fetch a specific product by ID. |
 | `/products`       | POST   | Create a new product (admin).  |
-| `/products/:id`   | PUT    | Update an existing product (admin). |
+| `/products/:id`   | PATCH    | Update an existing product (admin). |
 | `/products/:id`   | DELETE | Delete a product (admin).      |
 
 ---
