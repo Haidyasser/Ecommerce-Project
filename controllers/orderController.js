@@ -49,6 +49,9 @@ exports.getOrder = async (req, res) => {
 exports.createOrder = async (req, res) => {
     try {
         const products = req.body.products;
+        if (!products || !Array.isArray(products) || products.length === 0) {
+            return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Products array is required" });
+        }
         for (let i = 0; i < products.length; i++) {
             const product = await Product.findById(products[i].productId);
             if (!product) {
@@ -68,10 +71,12 @@ exports.createOrder = async (req, res) => {
 exports.updateOrder = async (req, res) => {
     try {
         const products = req.body.products;
-        for (let i = 0; i < products.length; i++) {
-            const product = await Product.findById(products[i].productId);
-            if (!product) {
-                return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
+        if (products && Array.isArray(products) && products.length > 0) {
+            for (let i = 0; i < products.length; i++) {
+                const product = await Product.findById(products[i].productId);
+                if (!product) {
+                    return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
+                }
             }
         }
         const updateOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
