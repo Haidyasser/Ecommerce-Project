@@ -66,8 +66,9 @@ Facilitates cart management for users.
 **Request Body**:
 ```json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
+  "firstName": "haidy",
+  "lastName": "yasser",
+  "email": "haidy@example.com",
   "password": "securepassword123"
 }
 ```
@@ -75,8 +76,16 @@ Facilitates cart management for users.
 **Response**:
 ```json
 {
-  "status": "success",
-  "message": "User registered successfully"
+    "status": "SUCCESS",
+    "data": {
+        "firstName": "haidy",
+        "lastName": "yasser",
+        "email": "haidy@example.com",
+        "password": "$2b$10$NHjpCHZylZOEtSY5Uk3PrOOCNiarme4RDYFQR5jRHVvh1fPqTZTl6",
+        "role": "user",
+        "_id": "674e2508deff99912ca3a669",
+        "__v": 0
+    }
 }
 ```
 
@@ -86,12 +95,12 @@ Facilitates cart management for users.
 
 **Method**: `POST`  
 **Endpoint**: `/auth/login`  
-**Description**: Login with email and password.
+**Description**: Login with email and password, the token is stoted Cookies.
 
 **Request Body**:
 ```json
 {
-  "email": "john@example.com",
+  "email": "haidy@example.com",
   "password": "securepassword123"
 }
 ```
@@ -99,8 +108,7 @@ Facilitates cart management for users.
 **Response**:
 ```json
 {
-  "status": "success",
-  "token": "JWT_ACCESS_TOKEN"
+  "status": "SUCCESS"
 }
 ```
 
@@ -131,10 +139,12 @@ Facilitates cart management for users.
 **Response**:
 ```json
 {
-  "status": "success",
+  "status": "SUCCESS",
   "data": [
-    { "id": "user1", "name": "John Doe", "email": "john@example.com" },
-    { "id": "user2", "name": "Jane Doe", "email": "jane@example.com" }
+    { "_id": "6748b57abd9b34f7893c85b7","firstName": "haidy","lastName": "yasser", "email": "haidy@gmail.com",
+            "password": "$2b$10$LW/k4Og47JbvBrMZKAAESeEzCGNHlV4yX2wTODOxtaemPDGfpVTf2", "role": "user"},
+    { "_id": "6748b57abd9b34f7893c85b7","firstName": "ahmed","lastName": "yasser", "email": "ahmed@gmail.com",
+            "password": "$2b$10$LW/k4Og47JbvBrMZKAAESeEzCGNHlV4yX2wTODOxtaemPDGfpVTf2", "role": "admin"}
   ]
 }
 ```
@@ -168,10 +178,10 @@ Facilitates cart management for users.
 **Response**:
 ```json
 {
-  "status": "success",
+  "status": "SUCCESS",
   "data": [
-    { "id": "prod1", "name": "Product A", "price": 100, "stock": 20 },
-    { "id": "prod2", "name": "Product B", "price": 200, "stock": 15 }
+     "_id": "673e1d1fda3b079ae3b6568e","name": "ZEBRONICS AC32FHD","price": 12799,
+            "category": "Monitors","image": "https://m.media-amazon.com/images/I/813Y1TIZwfL._SL1500_.jpg"
   ],
   "meta": {
     "total": 50,
@@ -210,7 +220,7 @@ Facilitates cart management for users.
 **Response**:
 ```json
 {
-  "status": "success",
+  "status": "SUCCESS",
   "data": {
     "id": "cart1",
     "userId": "user1",
