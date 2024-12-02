@@ -29,12 +29,10 @@ exports.getProducts = async (req, res) => {
         .skip((page - 1) * parseInt(limit))
         .limit(parseInt(limit));
 
-    res.status(200).json({
-        status: "SUCCESS",
+    res.status(httpStatus.OK).json({
+        status: httpStatus.SUCCESS,
         data: products,
-        total,
-        page: parseInt(page),
-        limit: parseInt(limit),
+        meta: { total, page, limit }
     });
 };
 

@@ -1,8 +1,5 @@
 const User = require("../models/userModel");
 const httpStatus = require("../utils/httpStatus");
-const bcrypt = require("bcrypt");
-const generateToken = require("../utils/generateToken");
-const { validationResult } = require("express-validator");
 
 exports.getUsers = async (req, res) => {
     try {

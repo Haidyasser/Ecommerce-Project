@@ -46,4 +46,4 @@ This project is a backend API for an ecommerce platform. It includes features fo
 5. The server should be running on `http://localhost:3000`.
 
 ## API Documentation
-The API documentation is available in the [API Documentation](./Ecommerce_API_Documentation.md) file.
+The API documentation is available in the [API Documentation](https://documenter.getpostman.com/view/28557407/2sAYBYgqud) file.
