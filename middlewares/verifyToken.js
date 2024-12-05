@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const httpStatus = require('../utils/httpStatus');
+const createError = require('http-errors');
 const User = require('../models/userModel');
 
 exports.verifyToken = async (req, res, next) => {
@@ -7,19 +7,19 @@ exports.verifyToken = async (req, res, next) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
         if (!token) {
-            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+            throw new createError.Unauthorized("Access denied");
         }
 
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
         const user = await User.findById(decoded.id);
         if (!user) {
-            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+            throw new createError.Unauthorized("Access denied");
         }
         req.user = decoded;
         next();
     }
     catch (error) {
-        res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.ERROR, message: error.message });
+        throw new createError.Unauthorized("Access denied");
     }
 };
 
@@ -29,7 +29,7 @@ exports.verifyTokenAdmin = async (req, res, next) => {
             next();
         }
         else {
-            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+            throw new createError.Unauthorized("Access denied");
         }
     })
 }
@@ -40,7 +40,7 @@ exports.verifyTokenAndAuthorized = async (req, res, next) => {
             next();
         }
         else {
-            return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.FAIL, message: "Access denied" });
+            throw new createError.Unauthorized("Access denied");
         }
     })
 }
