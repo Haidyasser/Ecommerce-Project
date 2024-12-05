@@ -9,6 +9,11 @@ This project is a backend API for an ecommerce platform. It includes features fo
 - **Cart Management**: Add, update, and remove products from the cart.
 - **Order Management**: Create, view, and manage user orders.
 - **Pagination**: Supports paginated results for products, carts, and orders.
+- **Search**: Full-text search for products based on name and category.
+- **Filtering**: Filter products by category, price range, and other attributes.
+- **Validation**: Input validation for all API endpoints.
+- **Error Handling**: Centralized error handling middleware.
+
 
 ## Technologies
 - **Node.js** with **Express** for backend development.
@@ -47,3 +52,4 @@ This project is a backend API for an ecommerce platform. It includes features fo
 
 ## API Documentation
 The API documentation is available in the [API Documentation](https://documenter.getpostman.com/view/28557407/2sAYBYgqud) file.
+
