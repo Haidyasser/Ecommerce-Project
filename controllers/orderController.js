@@ -1,104 +1,99 @@
 const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
-const httpStatus = require('../utils/httpStatus');
+const { Code, Status } = require('../utils/httpStatus');
+const createError = require('http-errors');
 
-exports.getOrders = async (req, res) => {
+exports.getOrders = async (req, res, next) => {
     try {
         const { page = 1, limit = 10 } = req.query;
         const orders = await Order.find({}, { "__v": false })
             .skip((page - 1) * limit)
             .limit(Number(limit));
         const total = await Order.countDocuments();
-        res.status(httpStatus.OK).json({
-             status: httpStatus.SUCCESS,
-             data: orders,
-             meta: { total, page, limit } 
+        res.status(Code.OK).json({
+            status: Status.SUCCESS,
+            data: orders,
+            meta: { total, page, limit }
         });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};
 
-exports.orderHistory = async (req, res) => {
+exports.orderHistory = async (req, res, next) => {
     try {
         const order = await Order.findOne({ userId: req.user.id }, { "__v": false });
         if (!order) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Order not found" });
+            throw createError.NotFound("OrderNotFoundError");
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: order });
+        res.status(Code.OK).json({ status: Status.SUCCESS, data: order });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};
 
-exports.getOrder = async (req, res) => {
+exports.getOrder = async (req, res, next) => {
     try {
         const order = await Order.findById(req.params.id, { "__v": false });
         if (!order) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Order not found" });
+            throw createError.NotFound("OrderNotFoundError");
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: order });
+        res.status(Code.OK).json({ status: Status.SUCCESS, data: order });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};
 
-exports.createOrder = async (req, res) => {
+exports.createOrder = async (req, res, next) => {
     try {
         const products = req.body.products;
         if (!products || !Array.isArray(products) || products.length === 0) {
-            return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Products array is required" });
+            throw createError.BadRequest("ProductsArrayRequiredError");
         }
         for (let i = 0; i < products.length; i++) {
             const product = await Product.findById(products[i].productId);
             if (!product) {
-                return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
+                throw createError.BadRequest("ProductNotFoundError");
             }
         }
         req.body.userId = req.user.id;
         const order = new Order(req.body);
         await order.save();
-        res.status(httpStatus.CREATED).json({ status: httpStatus.SUCCESS, data: order });
+        res.status(Code.CREATED).json({ status: Status.SUCCESS, data: order });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};
 
-exports.updateOrder = async (req, res) => {
+exports.updateOrder = async (req, res, next) => {
     try {
         const products = req.body.products;
         if (products && Array.isArray(products) && products.length > 0) {
             for (let i = 0; i < products.length; i++) {
                 const product = await Product.findById(products[i].productId);
                 if (!product) {
-                    return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.FAIL, message: "Product not found" });
+                    throw createError.BadRequest("ProductNotFoundError");
                 }
             }
         }
         const updateOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updateOrder) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Order not found" });
+            throw createError.NotFound("OrderNotFoundError");
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, data: updateOrder });
+        res.status(Code.OK).json({ status: Status.SUCCESS, data: updateOrder });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};
 
-exports.deleteOrder = async (req, res) => {
+exports.deleteOrder = async (req, res, next) => {
     try {
         const order = await Order.findByIdAndDelete(req.params.id);
         if (!order) {
-            return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.FAIL, message: "Order not found" });
+            throw createError.NotFound("OrderNotFoundError");
         }
-        res.status(httpStatus.OK).json({ status: httpStatus.SUCCESS, message: "Order deleted successfully" });
+        res.status(Code.OK).json({ status: Status.SUCCESS, message: "Order deleted successfully" });
+    } catch (error) {
+        next(error);
     }
-    catch (error) {
-        res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.ERROR, message: error.message });
-    }
-}
+};

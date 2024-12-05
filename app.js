@@ -5,11 +5,12 @@ const authRoute = require('./routes/authRoute');
 const cartRoute = require('./routes/cartRoute');
 const orderRoute = require('./routes/orderRoute');
 const mongoose = require('mongoose');
-const app = express();
 const cors = require('cors');
-const httpStatus = require('./utils/httpStatus');
-const dotenv = require('dotenv');
-dotenv.config();
+const createError = require('http-errors');
+const errorHandler = require('./middlewares/errorHandler');
+require('dotenv').config();
+const app = express();
+const PORT = process.env.PORT;
 
 // Enable CORS
 app.use(cors());
@@ -22,9 +23,8 @@ mongoose.connect(uri, {
     autoIndex: true
 }).then(() => {
     console.log('Connected to MongoDB');
-}
-).catch((error) => {
-    console.log('Error: ', error.message);
+}).catch((error) => {
+    console.log(`Error connecting to MongoDB at ${uri}: ${error.message}. Please check your connection string.`);
 });
 
 // Middleware to parse the request body
@@ -36,13 +36,12 @@ app.use('/auth', authRoute);
 app.use('/users', userRoute);
 app.use('/carts', cartRoute);
 app.use('/orders', orderRoute);
-app.all('*', (req, res) => {
-    res.status(httpStatus.NOT_FOUND)
-    .json({status: httpStatus.FAIL, message: 'Resource not found'});
+app.use('*', (req, res) => {
+    throw new createError.NotFound("Route does not exist");
 });
+app.use(errorHandler);
 
 // Listen to a port
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
