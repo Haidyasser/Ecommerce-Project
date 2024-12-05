@@ -9,7 +9,7 @@ This project is a backend API for an ecommerce platform. It includes features fo
 - **Cart Management**: Add, update, and remove products from the cart.
 - **Order Management**: Create, view, and manage user orders.
 - **Pagination**: Supports paginated results for products, carts, and orders.
-- **Search**: Full-text search for products based on name and category.
+- **Search**: Full-text search for products based on name and description.
 - **Filtering**: Filter products by category, price range, and other attributes.
 - **Validation**: Input validation for all API endpoints.
 - **Error Handling**: Centralized error handling middleware.
